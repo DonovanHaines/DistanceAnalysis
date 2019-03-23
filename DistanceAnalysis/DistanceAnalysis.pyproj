@@ -21,7 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="F:\AlkynylAAs\DistanceAnalysis.py">
+    <Compile Include="..\DistanceAnalysis.py">
       <Link>DistanceAnalysis.py</Link>
     </Compile>
   </ItemGroup>
