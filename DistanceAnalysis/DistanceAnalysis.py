@@ -1,15 +1,17 @@
-import tkinter as tk
-from tkinter.filedialog import askopenfilename
+#import tkinter as tk
+#from tkinter.filedialog import askopenfilename
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-
-filetoload = "temp"
-while filetoload != "":
-    filetoload = askopenfilename()
+dirtoload="F:/AlkynylAAs/"
+filestoload = ["decagly distances 100 ns.dat", "decagly distances 100 to 200 ns.dat", "decagly distances 200 to 300 ns.dat",
+               "decagly distances 300reinit to 400 ns.dat", "decagly distances 400 to 500 ns.dat"]
+fullfilestoload = [dirtoload + s for s in filestoload]
+for filetoload in fullfilestoload:
+    #filetoload = askopenfilename()
     print("Loading file ")
     print(filetoload)
     if 'data_matrix' in locals() and filetoload != "" : 
@@ -37,16 +39,18 @@ data_matrix.reset_index()
 
 print(data_matrix)
 
+plt.figure()
+f, axarr = plt.subplots(5,1, sharex=True)
+f.suptitle('Distances')
+axarr[0].plot(data_matrix["Time"], data_matrix['Tyr51OH-SubO1'])
+axarr[1].plot(data_matrix["Time"], data_matrix['Arg47CZ-SubC'])
+axarr[2].plot(data_matrix["Time"], data_matrix['Gln73N-SubC'])
+axarr[3].plot(data_matrix["Time"], data_matrix['Tyr51OH-SubC'])
+axarr[4].plot(data_matrix["Time"], data_matrix['HEME471FE-SubC1'])
 
-plt.plot(data_matrix["Time"], data_matrix['Tyr51OH-SubO1'])
-plt.plot(data_matrix["Time"], data_matrix['Arg47CZ-SubC'])
-plt.plot(data_matrix["Time"], data_matrix['Gln73N-SubC'])
-plt.plot(data_matrix["Time"], data_matrix['Tyr51OH-SubC'])
-plt.plot(data_matrix["Time"], data_matrix['HEME471FE-SubC1'])
+f.legend()
 
-plt.legend()
-
-plt.show()
+plt.show(block=False)
 
 print("Starting PCA Analysis")
 
@@ -70,6 +74,7 @@ print(principalDf)
 print(principalDf.shape)
 print(principalDf.iloc[199998:200007, :] )
 
+plt.figure()
 f, axarr = plt.subplots(4,1, sharex=True)
 f.suptitle('Principal Components')
 axarr[0].plot(principalDf['PC1'])
@@ -78,24 +83,52 @@ axarr[2].plot(principalDf['PC3'], color='g')
 axarr[3].plot(principalDf['PC4'], color='cyan')
 #axarr[4].plot(principalDf['PC5'])
 f.legend()
-plt.show()
+#plt.show(block=False)
 
 print("Done. Thank-you!")
-
-
-
 # Now for loadings
-
+print("Creating loadings.")
 loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
+print("Loadings:")
 print(loadings)
+
+plt.figure()
+
+
 #ax = loadings.plt(kind='bar', title = "Loadings")
 #ax.set_xlabel("Frame")
 #ax.set_ylabel("Loading")
 index = np.arange(5)
 bar_width=1.0/6.0
+print("Creating graph.")
 plt.bar(index, loadings[:,0], bar_width, label="PC1")
 plt.bar(index + bar_width, loadings[:,1], bar_width, label="PC2")
 plt.bar(index + bar_width*2, loadings[:,2], bar_width, label="PC3")
 plt.bar(index+ bar_width *3, loadings[:,3], bar_width, label="PC4")
 plt.xticks(index + bar_width, features)
-plt.show()
+plt.show(block=False)
+print("Graph done. Now finding min max info.")
+#Now find the frame with the max and min for each PC
+print("Finding maximum and minimum frame for each PC...")
+
+
+
+for i in np.arange(pca.components_.shape[0]):
+    print("For PC{0}:".format(i))
+    indexmin=(principalDf.iloc[:,i].idxmin())
+    indexmax=(principalDf.iloc[:,i].idxmax())
+    #max
+    print("    max is {0} at frame {1} (time {2} ns)".format(
+    principalDf.iloc[:,i].idxmax(),
+    indexmax,
+    indexmax*time_conversion))
+
+    #min
+    print("    min is {0} at frame {1} (time {2} ns)".format(
+    principalDf.iloc[:,i].idxmin(),
+    indexmin,
+    indexmin*time_conversion))
+    
+    
+    
+    plt.show() #to show last graph and hold for all graphs
